@@ -307,6 +307,41 @@
   .item-carrito .quitar-c { background: none; border: none; color: var(--orange-light); font-size: 0.78rem; cursor: pointer; text-decoration: underline; margin-top: 4px; }
 
   .total-row { display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 800; margin: 16px 0; color: var(--cream); }
+
+  /* ===== DESKTOP / COMPUTADOR ===== */
+  /* En celular todo queda igual que antes. Desde 860px de ancho (tablet
+     horizontal / computador) el catálogo se abre en varias columnas y las
+     pantallas de un solo paso (carrito, datos, pago, confirmación, admin)
+     se centran en una tarjeta angosta en vez de estirarse de pared a pared. */
+  .view-narrow { max-width: 520px; margin: 0 auto; }
+
+  @media (min-width: 860px) {
+    body { padding: 32px 24px 96px; }
+    .container { max-width: 1180px; }
+
+    .hero-card { padding: 30px 40px 26px; }
+    .logo-img { max-width: 260px; }
+    .hero-headline { max-width: 440px; font-size: 1.55rem; }
+
+    .view-narrow { max-width: 620px; }
+
+    .grid-productos {
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 18px;
+    }
+    .prod-card .nombre { font-size: 0.85rem; }
+
+    /* El modal deja de ser una "hoja" que sube desde abajo y pasa a ser
+       un cuadro centrado en la pantalla, como una ventana de escritorio. */
+    .overlay { align-items: center; padding: 24px; }
+    .modal {
+      max-width: 640px; max-height: 88vh; max-height: 88dvh;
+      border-radius: var(--radius-lg);
+      animation: none;
+    }
+
+    .carrito-flotante { max-width: 460px; }
+  }
 </style>
 <script src="https://checkout.bold.co/library/boldPaymentButton.js"></script>
 </head>
@@ -717,11 +752,11 @@ function quitarDelCarrito(idx) {
 function mostrarCarrito() {
   ocultarBold();
   if (carrito.length === 0) {
-    document.getElementById('viewPedido').innerHTML = `<p class="empty">Tu carrito está vacío</p>
-      <button class="submit-btn" onclick="renderCatalogo()">Ver el menú</button>`;
+    document.getElementById('viewPedido').innerHTML = `<div class="view-narrow"><p class="empty">Tu carrito está vacío</p>
+      <button class="submit-btn" onclick="renderCatalogo()">Ver el menú</button></div>`;
     return;
   }
-  let html = `<div class="cat-titulo">Tu pedido</div>`;
+  let html = `<div class="view-narrow"><div class="cat-titulo">Tu pedido</div>`;
   carrito.forEach((item, idx) => {
     html += `
       <div class="item-carrito">
@@ -736,6 +771,7 @@ function mostrarCarrito() {
   html += `<div class="total-row"><span>Total</span><span>${fmt(totalCarrito())}</span></div>`;
   html += `<button class="submit-btn" onclick="renderCatalogo()" style="background:#4a5a3e;margin-bottom:10px">← Seguir viendo el menú</button>`;
   html += `<button class="submit-btn" onclick="mostrarFormulario()">Continuar con mis datos</button>`;
+  html += `</div>`;
   document.getElementById('viewPedido').innerHTML = html;
 }
 
@@ -743,7 +779,7 @@ function mostrarCarrito() {
 function mostrarFormulario() {
   ocultarBold();
   document.getElementById('viewPedido').innerHTML = `
-    <div class="card">
+    <div class="view-narrow"><div class="card">
       <label>Nombre completo *</label>
       <input type="text" id="fNombre" placeholder="Tu nombre">
       <label>Teléfono *</label>
@@ -763,7 +799,7 @@ function mostrarFormulario() {
       <textarea id="fNota" rows="2" placeholder="Ej. sin cebolla, alergia a algún ingrediente, timbre dañado, etc."></textarea>
       <button class="submit-btn" id="btnEnviar" onclick="continuarAlPago()">Continuar al pago — ${fmt(totalCarrito())}</button>
       <button class="submit-btn" style="background:#4a5a3e" onclick="mostrarCarrito()">← Volver al carrito</button>
-    </div>`;
+    </div></div>`;
 }
 
 let pedidoPendiente = null;
@@ -813,6 +849,7 @@ function mostrarPantallaPago() {
   ocultarBold(); // por seguridad: saca el botón de Bold del HTML viejo ANTES de reemplazarlo
   const p = pedidoPendiente;
   document.getElementById('viewPedido').innerHTML = `
+    <div class="view-narrow">
     <div class="card" style="text-align:left">
       <p style="font-weight:bold;font-size:1.1rem;margin-bottom:10px">💳 Realiza tu pago</p>
       <p style="color:#cdd9bd;margin-bottom:12px">Total a pagar: <strong style="color:#f0ead6">${fmt(p.total)}</strong></p>
@@ -827,6 +864,7 @@ function mostrarPantallaPago() {
     </div>
     <button class="submit-btn" id="btnConfirmarFinal" disabled style="opacity:0.5" onclick="confirmarPedidoFinal()">Confirmar pedido</button>
     <button class="submit-btn" style="margin-top:10px;background:#4a5a3e" onclick="mostrarFormulario()">← Volver</button>
+    </div>
   `;
   mostrarBold(p.total, `Pedido Mickys Sandwiches - ${p.nombre}`, p);
 }
@@ -919,7 +957,7 @@ async function confirmarPedidoFinal() {
   const waLink = `https://wa.me/${WHATSAPP_NUMERO}?text=${mensaje}`;
 
   document.getElementById('viewPedido').innerHTML = `
-    <div class="msg">
+    <div class="view-narrow"><div class="msg">
       <h2>Pedido enviado ✓</h2>
       <p style="color:#cdd9bd;margin-top:6px">Total: <strong>${fmt(total)}</strong></p>
       <p style="color:#8ba86f;font-size:0.85rem;margin-top:6px">Envía el comprobante de pago junto con tu pedido por WhatsApp</p>
@@ -930,7 +968,7 @@ async function confirmarPedidoFinal() {
       <p style="margin-top:14px;font-size:0.8rem;color:${guardadoOk ? '#8ba86f' : '#e8a87c'}">
         ${guardadoOk ? '✓ Pedido enviado a tu Google Sheet' : '⚠ No se pudo confirmar el envío a Sheets (revisa tu hoja)'}
       </p>
-    </div>`;
+    </div></div>`;
 }
 
 // ============ INTEGRACIÓN GOOGLE FORM / CORREO ============
@@ -1018,14 +1056,14 @@ function showTab(tab) {
 
 function renderAdminLogin(errorMsg) {
   document.getElementById('viewAdmin').innerHTML = `
-    <div class="msg">
+    <div class="view-narrow"><div class="msg">
       <p>Ingresa la clave para ver los pedidos</p>
       <input type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
              id="passInput" placeholder="Clave" style="max-width:200px;margin:12px auto;display:block;text-align:center"
              onkeydown="if(event.key==='Enter')checkPass()">
       <button class="submit-btn" style="max-width:200px" onclick="checkPass()">Entrar</button>
       ${errorMsg ? `<p style="margin-top:12px;color:#e8a87c;font-size:0.85rem">${esc(errorMsg)}</p>` : ''}
-    </div>`;
+    </div></div>`;
 }
 
 function checkPass() {
@@ -1036,11 +1074,11 @@ function checkPass() {
 
 function mostrarAdmin() {
   document.getElementById('viewAdmin').innerHTML = GOOGLE_SHEET_LINK
-    ? `<div class="msg"><p>Todos tus pedidos están en tu Google Sheet en tiempo real.</p>
+    ? `<div class="view-narrow"><div class="msg"><p>Todos tus pedidos están en tu Google Sheet en tiempo real.</p>
        <a href="${GOOGLE_SHEET_LINK}" target="_blank" style="text-decoration:none">
          <button class="submit-btn" style="margin-top:16px;background:#0f9d58">📊 Abrir Google Sheet</button>
-       </a></div>`
-    : `<p class="empty">Agrega tu GOOGLE_SHEET_LINK en el código.</p>`;
+       </a></div></div>`
+    : `<div class="view-narrow"><p class="empty">Agrega tu GOOGLE_SHEET_LINK en el código.</p></div>`;
 }
 
 renderCatalogo();

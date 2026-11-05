@@ -1,0 +1,8 @@
+{
+  "name": "mickys-functions",
+  "private": true,
+  "description": "Dependencias de las funciones de Netlify de Mickys Sandwiches. Netlify instala esto automáticamente al desplegar, no hay que hacer nada manual.",
+  "dependencies": {
+    "@netlify/blobs": "^11.0.0"
+  }
+}

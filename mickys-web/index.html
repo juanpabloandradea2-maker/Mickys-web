@@ -786,12 +786,25 @@ async function continuarAlPago() {
   const direccionCompleta = apartamento ? `${direccion}, ${apartamento}` : direccion;
   const itemsTexto = carrito.map(item => `${item.cantidad}x ${item.nombre}${item.extrasTexto}`).join(', ');
 
+  const trackingId = `MICKYS-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
   pedidoPendiente = {
     fecha: new Date().toLocaleString('es-CO'),
     nombre, telefono, direccion: direccionCompleta, apartamento, nota, dia,
     items: itemsTexto,
-    total
+    total,
+    trackingId
   };
+
+  // Guardamos YA una copia de este pedido en el Google Sheet, marcada como
+  // "pendiente de pago", antes de que la persona pague. Así, si paga con Bold
+  // y nunca vuelve a confirmar manualmente, el pedido completo ya quedó
+  // registrado — solo falta que el negocio busque el ID de seguimiento
+  // (te llega por correo automático cuando Bold confirma el pago).
+  enviarAGoogleForm({
+    ...pedidoPendiente,
+    nota: `⏳ PENDIENTE DE PAGO (aún no confirmado) — seguimiento: ${trackingId}` + (nota ? ` | ${nota}` : '')
+  }).catch(() => {});
 
   mostrarPantallaPago();
 }
@@ -840,7 +853,7 @@ async function mostrarBold(total, descripcion, pedido) {
     const res = await fetch('/.netlify/functions/bold-signature', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: total, pedido })
+      body: JSON.stringify({ amount: total, orderId: pedido && pedido.trackingId })
     });
     if (!res.ok) throw new Error('bad status');
     firma = await res.json();

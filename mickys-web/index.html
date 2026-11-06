@@ -326,10 +326,10 @@
     .view-narrow { max-width: 620px; }
 
     .grid-productos {
-      grid-template-columns: repeat(auto-fit, minmax(230px, 260px));
-      gap: 18px;
-      justify-content: space-between;
+      grid-template-columns: repeat(var(--cols-desktop, 3), 1fr);
+      gap: 20px;
     }
+    .prod-card { max-width: 380px; width: 100%; margin: 0 auto; }
     .prod-card .nombre { font-size: 0.85rem; }
 
     /* El modal deja de ser una "hoja" que sube desde abajo y pasa a ser
@@ -530,7 +530,11 @@ function renderCatalogo() {
     if (items.length === 0) return;
     const dotColor = CATEGORIA_COLOR[cat] || '#c85a2e';
     html += `<div class="cat-titulo" id="catsec-${esc(cat)}" style="--dot-color:${dotColor}">${esc(cat)}</div>`;
-    html += `<div class="grid-productos">`;
+    // En computador cada categoría usa tantas columnas como productos tenga
+    // (máximo 3), para que las tarjetas llenen la fila completa en vez de
+    // dejar huecos o quedar como islas sueltas quien tiene pocos productos.
+    const colsEscritorio = Math.max(1, Math.min(items.length, 3));
+    html += `<div class="grid-productos" style="--cols-desktop:${colsEscritorio}">`;
     items.forEach(p => {
       html += `
         <div class="prod-card" onclick="abrirProducto('${p.id}')">
